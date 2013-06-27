@@ -15,7 +15,7 @@ u8 cube_buf[64]={
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 };
 #else
-u8 cube_buf[8][8]={
+u8 cube_buf[CUBE_SIZE][CUBE_SIZE]={
   {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,},
   {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,},
   {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,},
@@ -25,9 +25,9 @@ u8 cube_buf[8][8]={
   {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,},
   {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,},
 };
+uint8_t fb_buf[CUBE_SIZE][CUBE_SIZE];
 #endif
 
-u8 cube_cnt;
 u8 cube_level;
 u8 cube_row;
 u8 cube_column;
@@ -39,7 +39,14 @@ u8 cube_bit_map[8]={
 
 CUBE::CUBE()
 {
+  for(int i=0; i<64; i++){
+    *((uint8_t *)cube_buf+i) = 0;
+    *((uint8_t *)fb_buf+i) = 0;
+  }
 
+  cube_level = 0;
+  cube_row = 0;
+  cube_column = 0;
 }
 
 void CUBE :: init(void)
@@ -60,7 +67,6 @@ void CUBE :: init(void)
   }
   *((uint8_t *)cube_buf+29) = 0xAA;
 
-  cube_cnt = 0;
   cube_level = 0;
   cube_row = 0;
   cube_column = 0;
@@ -108,7 +114,7 @@ void CUBE :: write(uint8_t layer, char c)
 	}
 }
 
-void CUBE :: writePic8x8(uint8_t layer, uint8_t *pic)
+void CUBE :: write(uint8_t layer, uint8_t *pic)
 {
 	uint8_t cnt;
 	int i;
@@ -208,10 +214,7 @@ void CUBE :: scan(void)
         cube_level = 0;
       }
     }
-    // cube_cnt++;
-    // if(cube_cnt > 63){
-      // cube_cnt = 0;
-    // }
+    
   }
 
 }
@@ -222,4 +225,15 @@ SIGNAL(TIMER2_COMPA_vect)
 	act->scan();
 }
 
-
+void CUBE :: argorder(int ix1, int ix2, int *ox1, int *ox2)
+{
+	if (ix1>ix2)
+	{
+		int tmp;
+		tmp = ix1;
+		ix1= ix2;
+		ix2 = tmp;
+	}
+	*ox1 = ix1;
+	*ox2 = ix2;
+}
